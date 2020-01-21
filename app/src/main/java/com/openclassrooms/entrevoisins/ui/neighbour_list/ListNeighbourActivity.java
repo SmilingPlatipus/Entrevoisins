@@ -10,11 +10,12 @@ import android.support.v7.widget.Toolbar;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.model.Neighbour;
+import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ListNeighbourActivity extends AppCompatActivity implements NeighbourFragment.NeighbourFragmentCallback
+public class ListNeighbourActivity extends AppCompatActivity implements NeighbourFragment.NeighbourFragmentCallback, FavoriteFragment.FavoriteFragmentCallback
 {
 
     // UI Components
@@ -28,6 +29,7 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
 
     ListNeighbourPagerAdapter mPagerAdapter;
     public final static String MESSAGE_TO_DETAIL_ACTIVITY = "com.openclassrooms.entrevoisins.ui.neighbour_list";
+    public static NeighbourApiService mApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,8 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
 
         setSupportActionBar(mToolbar);
         mPagerAdapter = new ListNeighbourPagerAdapter(getSupportFragmentManager());
+        mPagerAdapter.addFragment(NeighbourFragment.newInstance(), "Neighbours");
+        mPagerAdapter.addFragment(FavoriteFragment.newInstance(),"Favorites");
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));

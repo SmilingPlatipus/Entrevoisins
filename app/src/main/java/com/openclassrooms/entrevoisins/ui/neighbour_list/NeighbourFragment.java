@@ -95,6 +95,8 @@ public class NeighbourFragment extends Fragment
      * Fired if the user clicks on a delete button
      * @param event
      */
+
+
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
         mApiService.deleteNeighbour(event.neighbour);
@@ -114,9 +116,6 @@ public class NeighbourFragment extends Fragment
 
                         //Si un des voisins est sélectionné, exécute cette fonction callback implémentée par le container
                         onNeighbourSelected(currentNeighbour);
-
-                        //Toast.makeText(getContext(), "You clicked on user : "+currentNeighbour.getName(), Toast.LENGTH_SHORT).show();
-
                     }
                 });
     }

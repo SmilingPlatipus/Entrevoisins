@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.model.Neighbour;
@@ -28,8 +29,9 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
 
 
     ListNeighbourPagerAdapter mPagerAdapter;
-    public final static String MESSAGE_TO_DETAIL_ACTIVITY = "com.openclassrooms.entrevoisins.ui.neighbour_list";
+    public final static String SELECTED_NEIGHBOUR = "Selected neighbour to DetailActivity";
     public static NeighbourApiService mApiService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +46,16 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
     }
 
     @Override
     public void onNeighbourSelected(Neighbour cNeighbour) {
-        Intent detailNeighbour = new Intent(this, DetailNeighbourActivity.class);
+        Intent detailNeighbour = new Intent(ListNeighbourActivity.this, DetailNeighbourActivity.class);
 
-        // On transmet l'Id du neighbour sélectionné dans la liste, à l'activité DetailNeighbourActivity, sous forme de String
-        detailNeighbour.putExtra(MESSAGE_TO_DETAIL_ACTIVITY,Integer.toString(cNeighbour.getId()));
+        // On transmet l'ID du neighbour sélectionné dans la liste, à l'activité DetailNeighbourActivity
+
+        detailNeighbour.putExtra(SELECTED_NEIGHBOUR,cNeighbour.getId());
         startActivity(detailNeighbour);
     }
 }

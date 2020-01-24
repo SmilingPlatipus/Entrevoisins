@@ -2,6 +2,7 @@ package com.openclassrooms.entrevoisins.service;
 
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -36,19 +37,32 @@ public class DummyNeighbourApiService implements NeighbourApiService
     }
 
     @Override
+    public Neighbour getNeighbour(int ID) {
+        if (neighbours.isEmpty()) return null;
+        for (int i=0;i<neighbours.size();i++)
+            if (neighbours.get(i).getId() == ID)
+                return neighbours.get(i);
+
+        return null;
+    }
+
+    @Override
     public void initNeighbours() {
-        neighbours = DummyNeighbourGenerator.generateNeighbours();
+            neighbours = DummyNeighbourGenerator.generateNeighbours();
     }
 
     @Override
     public void initFavorites() {
-        favorites = DummyNeighbourGenerator.generateFavorites();
-    }
+        favorites = DummyNeighbourGenerator.generateFavorites();    }
 
-    @Override
-    public Neighbour getNeighbour(int ID) {
-        return neighbours.get(ID);
-    }
+
+        /*
+        *   getNeighbour parcourt la liste en cours,
+        *   et cherche si un élément de la liste possède le même ID
+        *   Renvoie ensuite le voisin
+        *
+         */
+
 
     @Override
     public List<Neighbour> getFavorites() {
@@ -66,9 +80,13 @@ public class DummyNeighbourApiService implements NeighbourApiService
     }
 
     @Override
-    public Neighbour getFavorite(int ID) {
-        return favorites.get(ID);
+    public boolean containsFavorite(Neighbour neighbour) {
+        if (favorites.contains(neighbour))
+        return true;
+        else return false;
     }
 
-
 }
+
+
+

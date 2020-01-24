@@ -28,11 +28,11 @@ public interface NeighbourApiService
 
     void addNeighbour(Neighbour neighbour);
 
+    Neighbour getNeighbour(int ID);
+
     void initNeighbours();
 
     void initFavorites();
-
-    Neighbour getNeighbour(int ID);
 
     List<Neighbour> getFavorites();
 
@@ -42,5 +42,5 @@ public interface NeighbourApiService
     void addFavorite(Neighbour favorite);
 
 
-    Neighbour getFavorite(int ID);
+    boolean containsFavorite(Neighbour neighbour);
 }

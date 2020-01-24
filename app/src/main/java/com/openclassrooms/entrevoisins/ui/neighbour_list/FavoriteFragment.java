@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
+import com.openclassrooms.entrevoisins.events.AddFavoriteEvent;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
@@ -27,13 +28,10 @@ import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourAct
 
 public class FavoriteFragment extends Fragment
 {
-    private List<Neighbour> mNeighbours;
+    private List<Neighbour> mFavorites;
     private RecyclerView mRecyclerView;
     private MyNeighbourRecyclerViewAdapter mAdapter;
     private FavoriteFragmentCallback fragmentCaller;
-
-    //neighbour test
-    private Neighbour favoriteTest = new Neighbour(1, "Caroline", "http://i.pravatar.cc/150?u=a042581f4e29026704d");
 
 
     /**
@@ -48,7 +46,9 @@ public class FavoriteFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         //On attache ici une interface de Callback, que l'activité container doit redéfinir
+        
         fragmentCaller = (FavoriteFragmentCallback) context;
     }
 
@@ -57,10 +57,6 @@ public class FavoriteFragment extends Fragment
         super.onCreate(savedInstanceState);
         mApiService = DI.getNeighbourApiService();
         mApiService.initFavorites();
-        //test
-
-        mApiService.addFavorite(favoriteTest);
-
     }
 
     @Override
@@ -81,8 +77,8 @@ public class FavoriteFragment extends Fragment
      * Init the List of favorites
      */
     private void initList() {
-        mNeighbours = mApiService.getFavorites();
-        mAdapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
+        mFavorites = mApiService.getFavorites();
+        mAdapter = new MyNeighbourRecyclerViewAdapter(mFavorites);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -90,6 +86,13 @@ public class FavoriteFragment extends Fragment
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        AddFavoriteEvent addedFavorite = EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class);
+        if ((addedFavorite != null)) {
+            onAddFavorite(addedFavorite);
+            EventBus.getDefault().removeStickyEvent(addedFavorite);
+        }
+
+
     }
 
     @Override
@@ -98,13 +101,22 @@ public class FavoriteFragment extends Fragment
         EventBus.getDefault().unregister(this);
     }
 
+
+
     /**
      * Fired if the user clicks on a delete button
      * @param event
      */
     @Subscribe
-    public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        mApiService.deleteNeighbour(event.neighbour);
+    public void onDeleteFavorite(DeleteNeighbourEvent event) {
+        mApiService.deleteFavorite(event.neighbour);
+        initList();
+
+    }
+
+    @Subscribe
+    public void onAddFavorite(AddFavoriteEvent event) {
+        mApiService.addFavorite(event.neighbour);
         initList();
     }
 
@@ -121,8 +133,6 @@ public class FavoriteFragment extends Fragment
 
                         //Si un des voisins est sélectionné, exécute cette fonction callback implémentée par le container
                         onNeighbourSelected(currentNeighbour);
-
-                        //Toast.makeText(getContext(), "You clicked on user : "+currentNeighbour.getName(), Toast.LENGTH_SHORT).show();
 
                     }
                 });

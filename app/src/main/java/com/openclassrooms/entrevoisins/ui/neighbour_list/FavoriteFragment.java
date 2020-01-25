@@ -114,7 +114,10 @@ public class FavoriteFragment extends Fragment
         AddFavoriteEvent addedFavorite = EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class);
         RemoveFavoriteEvent removedFavorite = EventBus.getDefault().getStickyEvent(RemoveFavoriteEvent.class);
 
-        if ((addedFavorite != null)) {
+        //Traitement des events générés dans DetailActivityNeighbour
+        //On vérifie que le voisin ne soit pas déjà en favori, avant de mettre à jour la liste
+
+        if ((addedFavorite != null) && !mApiService.containsFavorite(addedFavorite.neighbour)) {
             onAddFavorite(addedFavorite);
             EventBus.getDefault().removeStickyEvent(addedFavorite);
         }

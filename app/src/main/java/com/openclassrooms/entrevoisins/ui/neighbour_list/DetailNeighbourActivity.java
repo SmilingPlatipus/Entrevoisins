@@ -48,6 +48,8 @@ public class DetailNeighbourActivity extends AppCompatActivity
 
     static Intent intent = new Intent();
 
+    boolean favoriteadded;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,10 @@ public class DetailNeighbourActivity extends AppCompatActivity
         //On récupère le voisin sélectionné grâce à son id, en le recherchant dans la liste que l'API conserve :
 
        currentNeighbour = mApiService.getNeighbour(selectedNeighbour);
+
+        // On vérifie s'il est ou non dans les favoris
+
+        favoriteadded = mApiService.containsFavorite(currentNeighbour);
 
         /*Récupère à l'aide de Glide l'image du voisin en récupérant l'Url correspondante,
         *   l'applique à un Textview situé en haut de l'écran
@@ -97,19 +103,22 @@ public class DetailNeighbourActivity extends AppCompatActivity
                 *   sinon on enlève le voisin des favoris et on supprime le AddFavoriteEvent
                  */
 
-                if (!mApiService.containsFavorite(currentNeighbour)) {
+                AddFavoriteEvent addFavorite = EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class);
+                RemoveFavoriteEvent removeFavorite = EventBus.getDefault().getStickyEvent(RemoveFavoriteEvent.class);
 
-                    if (EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class) == null)
-                        EventBus.getDefault().postSticky(new AddFavoriteEvent(currentNeighbour));
-                    else {
-                        EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
-                        EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
-                    }
+                // Si le voisin n'est pas déjà dans les favoris on doit l'ajouter
+                if (!favoriteadded) {
+                   if (addFavorite == null) EventBus.getDefault().postSticky(new AddFavoriteEvent(currentNeighbour));
+                   if (removeFavorite != null) EventBus.getDefault().removeStickyEvent(RemoveFavoriteEvent.class);
+                   favoriteadded = true;
+
                 }
+                // Cas où le voisin est déjà dans les favoris : on l'enlève
                 else
                 {
-                    EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
-                    EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
+                    if (addFavorite != null) EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
+                    if (removeFavorite == null) EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
+                    favoriteadded = false;
                 }
 
             }

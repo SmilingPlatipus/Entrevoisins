@@ -1,17 +1,20 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v7.widget.Toolbar;
-import android.widget.Toast;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
+
+import java.util.Iterator;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,7 +33,10 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
 
     ListNeighbourPagerAdapter mPagerAdapter;
     public final static String SELECTED_NEIGHBOUR = "Selected neighbour to DetailActivity";
+    public static final String [] FAVORITE_NAMES = {"Caroline","Jack","Chloé","Vincent","Elodie","Sylvain","Laetitia","Dan","Joseph","Emma","Patrick","Ludovic"};
+    public static final String SAVED_FAVORITE_LIST = "FAVORITELIST";
     public static NeighbourApiService mApiService;
+    public static SharedPreferences sharedPreferences;
 
 
     @Override
@@ -47,6 +53,30 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        /*
+            Sauvegarde des favoris quand l'activité s'arrête
+         */
+
+        List<Neighbour> currentFavorites = mApiService.getFavorites();
+        Iterator toSave = currentFavorites.iterator();
+        Neighbour favoriteToSave;
+
+        if (!currentFavorites.isEmpty())
+            do {
+                favoriteToSave = (Neighbour) toSave.next();
+
+                sharedPreferences
+                        .edit()
+                        .putInt(FAVORITE_NAMES[favoriteToSave.getId()-1],favoriteToSave.getId() )
+                        .apply();
+
+            }while(toSave.hasNext());
     }
 
     @Override

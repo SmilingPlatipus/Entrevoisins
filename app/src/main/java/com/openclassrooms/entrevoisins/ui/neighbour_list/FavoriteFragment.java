@@ -1,6 +1,7 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -15,15 +16,20 @@ import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.di.DI;
 import com.openclassrooms.entrevoisins.events.AddFavoriteEvent;
 import com.openclassrooms.entrevoisins.events.DeleteNeighbourEvent;
+import com.openclassrooms.entrevoisins.events.RemoveFavoriteEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import com.openclassrooms.entrevoisins.utils.ItemClickSupport;
 
+import java.util.Iterator;
 import java.util.List;
 
+import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.SAVED_FAVORITE_LIST;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.mApiService;
+import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.FAVORITE_NAMES;
+import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.sharedPreferences;
 
 
 public class FavoriteFragment extends Fragment
@@ -32,7 +38,6 @@ public class FavoriteFragment extends Fragment
     private RecyclerView mRecyclerView;
     private MyNeighbourRecyclerViewAdapter mAdapter;
     private FavoriteFragmentCallback fragmentCaller;
-
 
     /**
      * Create and return a new instance
@@ -48,7 +53,7 @@ public class FavoriteFragment extends Fragment
         super.onAttach(context);
 
         //On attache ici une interface de Callback, que l'activité container doit redéfinir
-        
+
         fragmentCaller = (FavoriteFragmentCallback) context;
     }
 
@@ -57,6 +62,18 @@ public class FavoriteFragment extends Fragment
         super.onCreate(savedInstanceState);
         mApiService = DI.getNeighbourApiService();
         mApiService.initFavorites();
+
+        /*
+            Chargement des favoris à partir du fichier SAVED_FAVORITE_LIST
+         */
+
+        sharedPreferences = getContext().getSharedPreferences(SAVED_FAVORITE_LIST, getContext().MODE_PRIVATE);
+
+        for(int i=0;i<12;i++)
+            if (sharedPreferences.contains(FAVORITE_NAMES[i])) {
+                mApiService.addFavorite(mApiService.getNeighbour(sharedPreferences.getInt(FAVORITE_NAMES[i], 0)));
+                sharedPreferences.edit().remove(FAVORITE_NAMES[i]).commit();
+            }
     }
 
     @Override
@@ -82,17 +99,29 @@ public class FavoriteFragment extends Fragment
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    //A la création des fragments, on vérifie que DetailNeighbourActivity n'a pas émis une demande d'ajout en favoris
+
     @Override
     public void onStart() {
         super.onStart();
+
+        /*
+            On souscrit à l'EventBus pour écouter AddFavorite et RemoveFavorite émis depuis DetailNeighbourActivity
+            On vérifie s'il n'y a pas des event en cache
+            On les enlève ensuite de EventBus quand ils ont été traité
+         */
         EventBus.getDefault().register(this);
         AddFavoriteEvent addedFavorite = EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class);
+        RemoveFavoriteEvent removedFavorite = EventBus.getDefault().getStickyEvent(RemoveFavoriteEvent.class);
+
         if ((addedFavorite != null)) {
             onAddFavorite(addedFavorite);
             EventBus.getDefault().removeStickyEvent(addedFavorite);
         }
-
-
+        if ((removedFavorite != null)) {
+           onRemoveFavorite(removedFavorite);
+           EventBus.getDefault().removeStickyEvent(removedFavorite);
+        }
     }
 
     @Override
@@ -102,6 +131,11 @@ public class FavoriteFragment extends Fragment
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
 
     /**
      * Fired if the user clicks on a delete button
@@ -109,14 +143,29 @@ public class FavoriteFragment extends Fragment
      */
     @Subscribe
     public void onDeleteFavorite(DeleteNeighbourEvent event) {
-        mApiService.deleteFavorite(event.neighbour);
+        mApiService.deleteNeighbour(event.neighbour);
+        mApiService.removeFavorite(event.neighbour);
+        EventBus.getDefault().removeStickyEvent(RemoveFavoriteEvent.class);
+        sharedPreferences.edit().remove(FAVORITE_NAMES[event.neighbour.getId()-1]).commit();
         initList();
-
     }
+
+    //Fonction implémentant l'ajout d'un favori à la liste, en réponse à l'événement émis depuis DetailNeighbourActivity
 
     @Subscribe
     public void onAddFavorite(AddFavoriteEvent event) {
         mApiService.addFavorite(event.neighbour);
+        EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
+        initList();
+    }
+
+    //Fonction implémentant la sortie d'un favori de la liste, en réponse à l'événement émis depuis DetailNeighbourActivity
+
+    @Subscribe
+    public void onRemoveFavorite(RemoveFavoriteEvent event) {
+        mApiService.removeFavorite(event.neighbour);
+        EventBus.getDefault().removeStickyEvent(RemoveFavoriteEvent.class);
+        sharedPreferences.edit().remove(FAVORITE_NAMES[event.neighbour.getId()-1]).commit();
         initList();
     }
 

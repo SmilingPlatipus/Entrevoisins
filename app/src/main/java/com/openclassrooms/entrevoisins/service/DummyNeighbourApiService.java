@@ -70,7 +70,7 @@ public class DummyNeighbourApiService implements NeighbourApiService
     }
 
     @Override
-    public void deleteFavorite(Neighbour favorite) {
+    public void removeFavorite(Neighbour favorite) {
         favorites.remove(favorite);
     }
 

@@ -37,7 +37,7 @@ public interface NeighbourApiService
     List<Neighbour> getFavorites();
 
 
-    void deleteFavorite(Neighbour favorite);
+    void removeFavorite(Neighbour favorite);
 
     void addFavorite(Neighbour favorite);
 

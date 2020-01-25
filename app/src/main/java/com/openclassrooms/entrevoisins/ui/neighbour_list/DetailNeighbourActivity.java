@@ -16,6 +16,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.events.AddFavoriteEvent;
+import com.openclassrooms.entrevoisins.events.RemoveFavoriteEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 
 import org.greenrobot.eventbus.EventBus;
@@ -42,10 +43,6 @@ public class DetailNeighbourActivity extends AppCompatActivity
     //Voisin sur lequel l'utilisateur a cliqué dans ListNeighbourActivity
 
     Neighbour currentNeighbour;
-
-    //Booléen passant à vrai quand le bouton étoile a été touché
-
-    boolean starButtonClicked = false;
 
     //Intent récupérant les messages transmis par ListNeighbourActivity
 
@@ -93,16 +90,28 @@ public class DetailNeighbourActivity extends AppCompatActivity
         {
             @Override
             public void onClick(View view) {
-                /* Si c'est la première fois qu'on appuie sur le bouton starbutton,
-                * et que le favori n'est pas dans la liste
-                *  on émet un Sticky Event
+
+                /* Si le favori n'est pas dans la liste et qu'il n'a pas déjà été ajouté par l'intermédiaire de l'écran de détail
+                *  ou chargé au démarrage, on émet un Sticky Event Add
                 *   réceptionné plus tard par FavoriteFragment
+                *   sinon on enlève le voisin des favoris et on supprime le AddFavoriteEvent
                  */
 
-                if (!starButtonClicked  && !mApiService.containsFavorite(currentNeighbour)) {
-                    starButtonClicked = true;
-                    EventBus.getDefault().postSticky(new AddFavoriteEvent(currentNeighbour));
+                if (!mApiService.containsFavorite(currentNeighbour)) {
+
+                    if (EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class) == null)
+                        EventBus.getDefault().postSticky(new AddFavoriteEvent(currentNeighbour));
+                    else {
+                        EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
+                        EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
+                    }
                 }
+                else
+                {
+                    EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
+                    EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
+                }
+
             }
         });
     }
@@ -128,6 +137,12 @@ public class DetailNeighbourActivity extends AppCompatActivity
 
     @Subscribe
     public void onAddFavoriteEvent(AddFavoriteEvent event) {
+    }
+
+    // L'événement doit être traité au sein de FavoriteFragment et non ici
+
+    @Subscribe
+    public void onRemoveFavoriteEvent(RemoveFavoriteEvent event) {
     }
 
     public void backToListNeighbourActivity(View v){

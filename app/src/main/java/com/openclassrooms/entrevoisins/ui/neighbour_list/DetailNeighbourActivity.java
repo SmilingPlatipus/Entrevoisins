@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -65,7 +64,6 @@ public class DetailNeighbourActivity extends AppCompatActivity
         int selectedNeighbour = intent.getIntExtra(SELECTED_NEIGHBOUR,0);
 
         sharedPreferences = this.getSharedPreferences(SAVED_FAVORITE_LIST, this.MODE_PRIVATE);
-        //sharedPreferences.getAll().clear();
 
         //On récupère le voisin sélectionné grâce à son id, en le recherchant dans la liste que l'API conserve :
 
@@ -96,6 +94,8 @@ public class DetailNeighbourActivity extends AppCompatActivity
         cardName.setText(currentNeighbour.getName());
         neighbourEmail.setText("www.facebook.fr/" + currentNeighbour.getName());
 
+        // Change la couleur de l'étoile en fonction de la présence du voisin dans les favoris
+
         if (favoriteadded) ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorFavoriteSelected)));
         else                ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorFavoriteUnselected)));
 
@@ -105,6 +105,12 @@ public class DetailNeighbourActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
 
+                /*
+                *       En fonction de la présence ou non dans les favoris :
+                *           -Changement de la couleur de l'étoile
+                *           -Inversion du booléen mémorisant l'état
+                *           -Sauvegarde/Suppression du favori dans les Preferencies
+                 */
                             if(favoriteadded){
                                 ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(getBaseContext(), R.color.colorFavoriteUnselected)));
                                 favoriteadded = false;

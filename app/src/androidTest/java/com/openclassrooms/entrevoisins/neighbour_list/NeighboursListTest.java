@@ -18,12 +18,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static android.support.test.espresso.matcher.ViewMatchers.hasMinimumChildCount;
 import static com.openclassrooms.entrevoisins.utils.RecyclerViewItemCountAssertion.withItemCount;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.AllOf.allOf;
 
 
 
@@ -31,7 +33,8 @@ import static org.hamcrest.core.IsNull.notNullValue;
  * Test class for list of neighbours
  */
 @RunWith(AndroidJUnit4.class)
-public class NeighboursListTest {
+public class NeighboursListTest
+{
 
     // This is fixed
     private static int ITEMS_COUNT = 12;
@@ -45,7 +48,7 @@ public class NeighboursListTest {
 
     @Rule
     public ActivityTestRule<DetailNeighbourActivity> mDetailActivityRule =
-            new ActivityTestRule<>(DetailNeighbourActivity.class,true,false);
+            new ActivityTestRule<>(DetailNeighbourActivity.class, true, false);
 
     @Before
     public void setUp() {
@@ -59,7 +62,7 @@ public class NeighboursListTest {
     @Test
     public void myNeighboursList_shouldNotBeEmpty() {
         // First scroll to the position that needs to be matched and click on it.
-        onView(ViewMatchers.withId(R.id.list_neighbours))
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours)))
                 .check(matches(hasMinimumChildCount(1)));
     }
 
@@ -69,36 +72,13 @@ public class NeighboursListTest {
     @Test
     public void myNeighboursList_deleteAction_shouldRemoveItem() {
         // Given : We remove the element at position 2
-        onView(ViewMatchers.withId(R.id.list_neighbours)).check(withItemCount(ITEMS_COUNT));
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours))).check(withItemCount(ITEMS_COUNT));
         // When perform a click on a delete icon
-        onView(ViewMatchers.withId(R.id.list_neighbours))
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(1, new DeleteViewAction()));
         // Then : the number of element is 11
-        onView(ViewMatchers.withId(R.id.list_neighbours)).check(withItemCount(ITEMS_COUNT-1));
-    }
-
-    /*
-        Try to launch DetailActivity on an item click, ensure it's not null
-     */
-
-    @Test
-    public void myNeighboursList_chooseAction_shouldLaunchDetailActivity() {
-        final String SELECTED_NEIGHBOUR = "Selected neighbour to DetailActivity";
-        // When perform a click on an element
-        onView(ViewMatchers.withId(R.id.list_neighbours))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(1, new SelectViewAction()));
-
-        Intent detailNeighbour = new Intent(mActivity.getApplicationContext(), DetailNeighbourActivity.class);
-
-        // On transmet l'ID du neighbour sélectionné dans la liste, à l'activité DetailNeighbourActivity
-
-        detailNeighbour.putExtra(SELECTED_NEIGHBOUR,1);
-        mDetailActivityRule.launchActivity(detailNeighbour);
-
-        //On s'assure que DetailActivity n'est pas null
-
-        mDetailActivity = mDetailActivityRule.getActivity();
-        assertThat(mDetailActivity, notNullValue());
-
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours))).check(withItemCount(ITEMS_COUNT - 1));
     }
 }
+
+

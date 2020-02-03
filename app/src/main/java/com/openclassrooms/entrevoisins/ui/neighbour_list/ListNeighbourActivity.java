@@ -13,9 +13,6 @@ import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.model.Neighbour;
 import com.openclassrooms.entrevoisins.service.NeighbourApiService;
 
-import java.util.Iterator;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 

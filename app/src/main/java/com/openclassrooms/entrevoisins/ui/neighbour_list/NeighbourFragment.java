@@ -32,7 +32,7 @@ import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourAct
 
 public class NeighbourFragment extends Fragment
 {
-    private List<Neighbour> mNeighbours;
+    private List<Neighbour> mNeighbours = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private MyNeighbourRecyclerViewAdapter mAdapter;
     private NeighbourFragmentCallback fragmentCaller;
@@ -61,6 +61,22 @@ public class NeighbourFragment extends Fragment
         super.onCreate(savedInstanceState);
         mApiService = DI.getNeighbourApiService();
         mApiService.initNeighbours();
+
+        if (favoriteFilter)
+        {
+            /*
+            Chargement des favoris à partir du fichier SAVED_FAVORITE_LIST
+         */
+
+            sharedPreferences = getContext().getSharedPreferences(SAVED_FAVORITE_LIST, getContext().MODE_PRIVATE);
+
+            for(int i=0;i<12;i++)
+                if (sharedPreferences.contains(FAVORITE_NAMES[i])) {
+                    mApiService.addToFavorite(i + 1);
+                    mNeighbours.add(mApiService.getNeighbour(i+1));
+                }
+
+        }
     }
 
     @Override
@@ -81,35 +97,12 @@ public class NeighbourFragment extends Fragment
      * Init the List of neighbours or the list of favorites, depending on favoritefilter
      */
     private void initList() {
-        mNeighbours = mApiService.getNeighbours();
         if (!favoriteFilter)
-            mAdapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
-        else {
-             /*
-            Chargement des favoris à partir du fichier SAVED_FAVORITE_LIST
-         */
+            mNeighbours = mApiService.getNeighbours();
+        else
+            mNeighbours = mApiService.getFavorites();
 
-            sharedPreferences = getContext().getSharedPreferences(SAVED_FAVORITE_LIST, getContext().MODE_PRIVATE);
-
-            for(int i=0;i<12;i++)
-                if (sharedPreferences.contains(FAVORITE_NAMES[i])) {
-                    mApiService.addToFavorite(i + 1);
-                }
-
-            List<Neighbour> favorites = new ArrayList<>();
-            Iterator fIterator = mNeighbours.iterator();
-            Neighbour neighbourToTest;
-            while(fIterator.hasNext()){
-
-               neighbourToTest = (Neighbour) fIterator.next();
-                if(neighbourToTest.isFavorite())
-                    favorites.add(neighbourToTest);
-            }
-
-            mAdapter = new MyNeighbourRecyclerViewAdapter(favorites);
-            }
-
-
+        mAdapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -140,7 +133,6 @@ public class NeighbourFragment extends Fragment
 
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        mApiService.removeFromFavorite(event.neighbour.getId());
         sharedPreferences.edit().remove(FAVORITE_NAMES[event.neighbour.getId()-1]).commit();
         mApiService.deleteNeighbour(event.neighbour);
 

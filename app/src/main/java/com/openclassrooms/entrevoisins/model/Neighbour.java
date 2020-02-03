@@ -23,6 +23,10 @@ public class Neighbour
      */
     private String avatarUrl;
 
+    // Est en favoris ou pas
+
+    private boolean favorite;
+
     /**
      * Constructor
      *
@@ -34,6 +38,7 @@ public class Neighbour
         this.id = id;
         this.name = name;
         this.avatarUrl = avatarUrl;
+        this.favorite = false;
     }
 
     public Integer getId() {
@@ -59,6 +64,10 @@ public class Neighbour
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
     }
+
+    public void setFavorite(boolean isFavorite){ this.favorite = isFavorite;}
+
+    public boolean isFavorite(){return this.favorite;}
 
     @Override
     public boolean equals(Object o) {

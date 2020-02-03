@@ -19,7 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ListNeighbourActivity extends AppCompatActivity implements NeighbourFragment.NeighbourFragmentCallback, FavoriteFragment.FavoriteFragmentCallback
+public class ListNeighbourActivity extends AppCompatActivity implements NeighbourFragment.NeighbourFragmentCallback
 {
 
     // UI Components
@@ -33,8 +33,6 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
 
     ListNeighbourPagerAdapter mPagerAdapter;
     public final static String SELECTED_NEIGHBOUR = "Selected neighbour to DetailActivity";
-    public static final String [] FAVORITE_NAMES = {"Caroline","Jack","Chloé","Vincent","Elodie","Sylvain","Laetitia","Dan","Joseph","Emma","Patrick","Ludovic"};
-    public static final String SAVED_FAVORITE_LIST = "FAVORITELIST";
     public static NeighbourApiService mApiService;
     public static SharedPreferences sharedPreferences;
 
@@ -45,10 +43,11 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
         setContentView(R.layout.activity_list_neighbour);
         ButterKnife.bind(this);
 
+
         setSupportActionBar(mToolbar);
         mPagerAdapter = new ListNeighbourPagerAdapter(getSupportFragmentManager());
-        mPagerAdapter.addFragment(NeighbourFragment.newInstance(), "Neighbours");
-        mPagerAdapter.addFragment(FavoriteFragment.newInstance(),"Favorites");
+        mPagerAdapter.addFragment(NeighbourFragment.newInstance(false), "Neighbours");
+        mPagerAdapter.addFragment(NeighbourFragment.newInstance(true),"Favorites");
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
@@ -58,25 +57,6 @@ public class ListNeighbourActivity extends AppCompatActivity implements Neighbou
     @Override
     protected void onStop() {
         super.onStop();
-
-        /*
-            Sauvegarde des favoris quand l'activité s'arrête
-         */
-
-        List<Neighbour> currentFavorites = mApiService.getFavorites();
-        Iterator toSave = currentFavorites.iterator();
-        Neighbour favoriteToSave;
-
-        if (!currentFavorites.isEmpty())
-            do {
-                favoriteToSave = (Neighbour) toSave.next();
-
-                sharedPreferences
-                        .edit()
-                        .putInt(FAVORITE_NAMES[favoriteToSave.getId()-1],favoriteToSave.getId() )
-                        .apply();
-
-            }while(toSave.hasNext());
     }
 
     @Override

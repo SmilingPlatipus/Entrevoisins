@@ -1,9 +1,13 @@
 package com.openclassrooms.entrevoisins.ui.neighbour_list;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,12 +19,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.openclassrooms.entrevoisins.R;
-import com.openclassrooms.entrevoisins.events.AddFavoriteEvent;
-import com.openclassrooms.entrevoisins.events.RemoveFavoriteEvent;
 import com.openclassrooms.entrevoisins.model.Neighbour;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,6 +27,8 @@ import butterknife.ButterKnife;
 
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.SELECTED_NEIGHBOUR;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.mApiService;
+import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.sharedPreferences;
+
 
 public class DetailNeighbourActivity extends AppCompatActivity
 {
@@ -49,6 +50,8 @@ public class DetailNeighbourActivity extends AppCompatActivity
     static Intent intent = new Intent();
 
     boolean favoriteadded;
+    public static final String [] FAVORITE_NAMES = {"Caroline","Jack","Chloé","Vincent","Elodie","Sylvain","Laetitia","Dan","Joseph","Emma","Patrick","Ludovic"};
+    public static final String SAVED_FAVORITE_LIST = "FAVORITELIST";
 
 
     @Override
@@ -61,6 +64,8 @@ public class DetailNeighbourActivity extends AppCompatActivity
         intent = getIntent();
         int selectedNeighbour = intent.getIntExtra(SELECTED_NEIGHBOUR,0);
 
+        sharedPreferences = this.getSharedPreferences(SAVED_FAVORITE_LIST, this.MODE_PRIVATE);
+        //sharedPreferences.getAll().clear();
 
         //On récupère le voisin sélectionné grâce à son id, en le recherchant dans la liste que l'API conserve :
 
@@ -68,7 +73,7 @@ public class DetailNeighbourActivity extends AppCompatActivity
 
         // On vérifie s'il est ou non dans les favoris
 
-        favoriteadded = mApiService.containsFavorite(currentNeighbour);
+        favoriteadded = currentNeighbour.isFavorite();
 
         /*Récupère à l'aide de Glide l'image du voisin en récupérant l'Url correspondante,
         *   l'applique à un Textview situé en haut de l'écran
@@ -91,35 +96,30 @@ public class DetailNeighbourActivity extends AppCompatActivity
         cardName.setText(currentNeighbour.getName());
         neighbourEmail.setText("www.facebook.fr/" + currentNeighbour.getName());
 
+        if (favoriteadded) ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorFavoriteSelected)));
+        else                ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorFavoriteUnselected)));
+
 
         starButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view) {
 
-                /* Si le favori n'est pas dans la liste et qu'il n'a pas déjà été ajouté par l'intermédiaire de l'écran de détail
-                *  ou chargé au démarrage, on émet un Sticky Event Add
-                *   réceptionné plus tard par FavoriteFragment
-                *   sinon on enlève le voisin des favoris et on supprime le AddFavoriteEvent
-                 */
-
-                AddFavoriteEvent addFavorite = EventBus.getDefault().getStickyEvent(AddFavoriteEvent.class);
-                RemoveFavoriteEvent removeFavorite = EventBus.getDefault().getStickyEvent(RemoveFavoriteEvent.class);
-
-                // Si le voisin n'est pas déjà dans les favoris on doit l'ajouter
-                if (!favoriteadded) {
-                   if (addFavorite == null) EventBus.getDefault().postSticky(new AddFavoriteEvent(currentNeighbour));
-                   if (removeFavorite != null) EventBus.getDefault().removeStickyEvent(RemoveFavoriteEvent.class);
-                   favoriteadded = true;
-
-                }
-                // Cas où le voisin est déjà dans les favoris : on l'enlève
-                else
-                {
-                    if (addFavorite != null) EventBus.getDefault().removeStickyEvent(AddFavoriteEvent.class);
-                    if (removeFavorite == null) EventBus.getDefault().postSticky(new RemoveFavoriteEvent(currentNeighbour));
-                    favoriteadded = false;
-                }
+                            if(favoriteadded){
+                                ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(getBaseContext(), R.color.colorFavoriteUnselected)));
+                                favoriteadded = false;
+                                mApiService.removeFromFavorite(currentNeighbour.getId());
+                                sharedPreferences.edit().remove(FAVORITE_NAMES[currentNeighbour.getId()-1]).commit();
+                            }
+                            else {
+                                ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(getBaseContext(), R.color.colorFavoriteSelected)));
+                                favoriteadded = true;
+                                mApiService.addToFavorite(currentNeighbour.getId());
+                                sharedPreferences
+                                        .edit()
+                                        .putInt(FAVORITE_NAMES[currentNeighbour.getId()-1],currentNeighbour.getId() )
+                                        .apply();
+                            }
 
             }
         });
@@ -128,7 +128,6 @@ public class DetailNeighbourActivity extends AppCompatActivity
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -139,19 +138,6 @@ public class DetailNeighbourActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
-    }
-
-    // L'événement doit être traité au sein de FavoriteFragment et non ici
-
-    @Subscribe
-    public void onAddFavoriteEvent(AddFavoriteEvent event) {
-    }
-
-    // L'événement doit être traité au sein de FavoriteFragment et non ici
-
-    @Subscribe
-    public void onRemoveFavoriteEvent(RemoveFavoriteEvent event) {
     }
 
     public void backToListNeighbourActivity(View v){

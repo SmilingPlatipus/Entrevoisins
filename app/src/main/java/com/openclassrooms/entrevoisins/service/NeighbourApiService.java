@@ -30,15 +30,7 @@ public interface NeighbourApiService
 
     void initNeighbours();
 
-    void initFavorites();
+    void addToFavorite(int ID);
 
-    List<Neighbour> getFavorites();
-
-
-    void removeFavorite(Neighbour favorite);
-
-    void addFavorite(Neighbour favorite);
-
-
-    boolean containsFavorite(Neighbour neighbour);
+    void removeFromFavorite(int ID);
 }

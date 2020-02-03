@@ -26,8 +26,6 @@ public interface NeighbourApiService
      */
     void deleteNeighbour(Neighbour neighbour);
 
-    void addNeighbour(Neighbour neighbour);
-
     Neighbour getNeighbour(int ID);
 
     void initNeighbours();

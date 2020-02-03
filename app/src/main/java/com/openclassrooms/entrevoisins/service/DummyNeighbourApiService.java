@@ -32,11 +32,6 @@ public class DummyNeighbourApiService implements NeighbourApiService
     }
 
     @Override
-    public void addNeighbour(Neighbour neighbour) {
-        neighbours.add(neighbour);
-    }
-
-    @Override
     public Neighbour getNeighbour(int ID) {
         if (neighbours.isEmpty()) return null;
         for (int i=0;i<neighbours.size();i++)
@@ -54,15 +49,6 @@ public class DummyNeighbourApiService implements NeighbourApiService
     @Override
     public void initFavorites() {
         favorites = DummyNeighbourGenerator.generateFavorites();    }
-
-
-        /*
-        *   getNeighbour parcourt la liste en cours,
-        *   et cherche si un élément de la liste possède le même ID
-        *   Renvoie ensuite le voisin
-        *
-         */
-
 
     @Override
     public List<Neighbour> getFavorites() {

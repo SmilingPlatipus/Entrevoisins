@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import static com.openclassrooms.entrevoisins.ui.neighbour_list.DetailNeighbourActivity.FAVORITE_NAMES;
+import static com.openclassrooms.entrevoisins.service.DummyNeighbourGenerator.DUMMY_NEIGHBOURS;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.DetailNeighbourActivity.SAVED_FAVORITE_LIST;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.mApiService;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.sharedPreferences;
@@ -70,7 +70,7 @@ public class NeighbourFragment extends Fragment
             sharedPreferences = getContext().getSharedPreferences(SAVED_FAVORITE_LIST, getContext().MODE_PRIVATE);
 
             for(int i=0;i<12;i++)
-                if (sharedPreferences.contains(FAVORITE_NAMES[i])) {
+                if (sharedPreferences.contains(DUMMY_NEIGHBOURS.get(i).getName())) {
                     mApiService.addToFavorite(i + 1);
                     mNeighbours.add(mApiService.getNeighbour(i+1));
                 }
@@ -132,9 +132,9 @@ public class NeighbourFragment extends Fragment
 
     @Subscribe
     public void onDeleteNeighbour(DeleteNeighbourEvent event) {
-        sharedPreferences.edit().remove(FAVORITE_NAMES[event.neighbour.getId()-1]).commit();
-        mApiService.deleteNeighbour(event.neighbour);
 
+        sharedPreferences.edit().remove(DUMMY_NEIGHBOURS.get(event.neighbour.getId()-1).getName()).commit();
+        mApiService.deleteNeighbour(event.neighbour);
 
         initList();
     }

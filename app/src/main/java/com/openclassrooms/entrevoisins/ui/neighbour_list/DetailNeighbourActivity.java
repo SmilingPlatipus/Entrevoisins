@@ -24,6 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
+import static com.openclassrooms.entrevoisins.service.DummyNeighbourGenerator.DUMMY_NEIGHBOURS;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.SELECTED_NEIGHBOUR;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.mApiService;
 import static com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity.sharedPreferences;
@@ -49,7 +50,6 @@ public class DetailNeighbourActivity extends AppCompatActivity
     static Intent intent = new Intent();
 
     boolean favoriteadded;
-    public static final String [] FAVORITE_NAMES = {"Caroline","Jack","Chloé","Vincent","Elodie","Sylvain","Laetitia","Dan","Joseph","Emma","Patrick","Ludovic"};
     public static final String SAVED_FAVORITE_LIST = "FAVORITELIST";
 
 
@@ -115,7 +115,7 @@ public class DetailNeighbourActivity extends AppCompatActivity
                                 ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(getBaseContext(), R.color.colorFavoriteUnselected)));
                                 favoriteadded = false;
                                 mApiService.removeFromFavorite(currentNeighbour.getId());
-                                sharedPreferences.edit().remove(FAVORITE_NAMES[currentNeighbour.getId()-1]).commit();
+                                sharedPreferences.edit().remove(DUMMY_NEIGHBOURS.get(currentNeighbour.getId()-1).getName()).commit();
                             }
                             else {
                                 ImageViewCompat.setImageTintList(starButton, ColorStateList.valueOf(ContextCompat.getColor(getBaseContext(), R.color.colorFavoriteSelected)));
@@ -123,7 +123,7 @@ public class DetailNeighbourActivity extends AppCompatActivity
                                 mApiService.addToFavorite(currentNeighbour.getId());
                                 sharedPreferences
                                         .edit()
-                                        .putInt(FAVORITE_NAMES[currentNeighbour.getId()-1],currentNeighbour.getId() )
+                                        .putInt(DUMMY_NEIGHBOURS.get(currentNeighbour.getId()-1).getName(),currentNeighbour.getId() )
                                         .apply();
                             }
 

@@ -1,24 +1,20 @@
 
 package com.openclassrooms.entrevoisins.neighbour_list;
 
-import android.content.Intent;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.openclassrooms.entrevoisins.R;
-import com.openclassrooms.entrevoisins.ui.neighbour_list.DetailNeighbourActivity;
 import com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity;
 import com.openclassrooms.entrevoisins.utils.DeleteViewAction;
-import com.openclassrooms.entrevoisins.utils.SelectViewAction;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
@@ -40,15 +36,11 @@ public class NeighboursListTest
     private static int ITEMS_COUNT = 12;
 
     private ListNeighbourActivity mActivity;
-    private DetailNeighbourActivity mDetailActivity;
 
     @Rule
     public ActivityTestRule<ListNeighbourActivity> mActivityRule =
             new ActivityTestRule(ListNeighbourActivity.class);
 
-    @Rule
-    public ActivityTestRule<DetailNeighbourActivity> mDetailActivityRule =
-            new ActivityTestRule<>(DetailNeighbourActivity.class, true, false);
 
     @Before
     public void setUp() {
@@ -57,11 +49,11 @@ public class NeighboursListTest
     }
 
     /**
-     * We ensure that our recyclerview is displaying at least on item
+     * We ensure that our recyclerview is displaying at least one item
      */
     @Test
     public void myNeighboursList_shouldNotBeEmpty() {
-        // First scroll to the position that needs to be matched and click on it.
+
         onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours)))
                 .check(matches(hasMinimumChildCount(1)));
     }

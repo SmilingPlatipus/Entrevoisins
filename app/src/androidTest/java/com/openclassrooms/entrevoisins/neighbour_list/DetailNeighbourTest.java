@@ -92,14 +92,11 @@ public class DetailNeighbourTest
 
         //On swipe vers la gauche
         //On vérifie que le favori ajouté correspond bien au voisin sélectionné
-        //Puis on le supprime
-
         onView(ViewMatchers.withId(R.id.container)).perform(ViewActions.swipeLeft());
         onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.item_list_name)))
                 .check(matches(withText(DUMMY_NEIGHBOURS.get(0).getName())));
-        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours)))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, new DeleteViewAction()));
     }
+
 
 
 }

@@ -5,12 +5,14 @@ import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
 
 import com.openclassrooms.entrevoisins.R;
 import com.openclassrooms.entrevoisins.ui.neighbour_list.ListNeighbourActivity;
 import com.openclassrooms.entrevoisins.utils.DeleteViewAction;
 import com.openclassrooms.entrevoisins.utils.SelectViewAction;
 
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +25,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.openclassrooms.entrevoisins.service.DummyNeighbourGenerator.DUMMY_NEIGHBOURS;
+import static com.openclassrooms.entrevoisins.utils.RecyclerViewItemCountAssertion.withItemCount;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 
@@ -81,7 +84,8 @@ public class DetailNeighbourTest
      */
 
     @Test
-    public void myDetailActivity_addFavoriteAction_shouldDisplayOnlyFavoriteToFavoriteList() {
+    public void myDetailActivity_addAndRemoveFavoriteAction_shouldDisplayOnlyFavoriteToFavoriteList() {
+        //On sélectionne un voisin
 
         onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_neighbours)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, new SelectViewAction()));
@@ -93,10 +97,23 @@ public class DetailNeighbourTest
         //On swipe vers la gauche
         //On vérifie que le favori ajouté correspond bien au voisin sélectionné
         onView(ViewMatchers.withId(R.id.container)).perform(ViewActions.swipeLeft());
-        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.item_list_name)))
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.item_listfavorite_name)))
                 .check(matches(withText(DUMMY_NEIGHBOURS.get(0).getName())));
+
+        //On sélectionne le favori
+
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_favorites)))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, new SelectViewAction()));
+        //On appuie sur le bouton étoile puis sur le bouton back
+
+        onView(ViewMatchers.withId(R.id.starButton)).perform(click());
+        onView(ViewMatchers.withId(R.id.imageButton)).perform(click());
+
+        //On revient dans la vue favoris, on contrôle qu'elle soit vide
+
+        onView(ViewMatchers.withId(R.id.container)).perform(ViewActions.swipeLeft());
+        onView(allOf(ViewMatchers.isDisplayed(), ViewMatchers.withId(R.id.list_favorites)))
+                .check(withItemCount(0));
     }
-
-
 
 }

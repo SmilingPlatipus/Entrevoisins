@@ -21,19 +21,18 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeighbourRecyclerViewAdapter.ViewHolder> {
+public class MyFavoriteRecyclerViewAdapter extends RecyclerView.Adapter<MyFavoriteRecyclerViewAdapter.ViewHolder> {
 
     private final List<Neighbour> mNeighbours;
-    private boolean favoriteFilter;
 
-    public MyNeighbourRecyclerViewAdapter(List<Neighbour> items) {
+    public MyFavoriteRecyclerViewAdapter(List<Neighbour> items) {
         mNeighbours = items;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_neighbour, parent, false);
+                .inflate(R.layout.fragment_favorite, parent, false);
 
         return new ViewHolder(view);
     }
@@ -52,7 +51,7 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
         holder.mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour));
+                EventBus.getDefault().post(new DeleteNeighbourEvent(neighbour));
             }
         });
 
@@ -65,11 +64,11 @@ public class MyNeighbourRecyclerViewAdapter extends RecyclerView.Adapter<MyNeigh
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.item_list_avatar)
+        @BindView(R.id.item_listfavorite_avatar)
         public ImageView mNeighbourAvatar;
-        @BindView(R.id.item_list_name)
+        @BindView(R.id.item_listfavorite_name)
         public TextView mNeighbourName;
-        @BindView(R.id.item_list_delete_button)
+        @BindView(R.id.item_listfavorite_delete_button)
         public ImageButton mDeleteButton;
 
         public ViewHolder(View view) {

@@ -33,7 +33,8 @@ public class NeighbourFragment extends Fragment
 {
     private List<Neighbour> mNeighbours = new ArrayList<>();
     private RecyclerView mRecyclerView;
-    private MyNeighbourRecyclerViewAdapter mAdapter;
+    private MyNeighbourRecyclerViewAdapter mNeighbourAdapter;
+    private MyFavoriteRecyclerViewAdapter mFavoriteAdapter;
     private NeighbourFragmentCallback fragmentCaller;
     private boolean favoriteFilter;
 
@@ -81,7 +82,11 @@ public class NeighbourFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
+        View view;
+        if (!favoriteFilter)
+            view = inflater.inflate(R.layout.fragment_neighbour_list, container, false);
+        else
+            view = inflater.inflate(R.layout.fragment_favorite_list, container, false);
         Context context = view.getContext();
         mRecyclerView = (RecyclerView) view;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -96,13 +101,16 @@ public class NeighbourFragment extends Fragment
      * Init the List of neighbours or the list of favorites, depending on favoritefilter
      */
     private void initList() {
-        if (!favoriteFilter)
+        if (!favoriteFilter) {
             mNeighbours = mApiService.getNeighbours();
-        else
+            mNeighbourAdapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
+            mRecyclerView.setAdapter(mNeighbourAdapter);
+        }
+        else {
             mNeighbours = mApiService.getFavorites();
-
-        mAdapter = new MyNeighbourRecyclerViewAdapter(mNeighbours);
-        mRecyclerView.setAdapter(mAdapter);
+            mFavoriteAdapter = new MyFavoriteRecyclerViewAdapter(mNeighbours);
+            mRecyclerView.setAdapter(mFavoriteAdapter);
+        }
     }
 
     @Override
@@ -141,19 +149,34 @@ public class NeighbourFragment extends Fragment
 
 
     private void configureOnClickRecyclerView(){
-        ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_neighbour_list)
+        if (!favoriteFilter)
+            ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_neighbour_list)
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
                         //On récupère le voisin courant par la position cliquée
 
-                        Neighbour currentNeighbour = mAdapter.getNeighbour(position);
+                        Neighbour currentNeighbour = mNeighbourAdapter.getNeighbour(position);
 
                         //Si un des voisins est sélectionné, exécute cette fonction callback implémentée par le container
                         onNeighbourSelected(currentNeighbour);
                     }
                 });
+        else
+            ItemClickSupport.addTo(mRecyclerView, R.layout.fragment_favorite_list)
+                    .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                        @Override
+                        public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+
+                            //On récupère le voisin courant par la position cliquée
+
+                            Neighbour currentNeighbour = mFavoriteAdapter.getNeighbour(position);
+
+                            //Si un des voisins est sélectionné, exécute cette fonction callback implémentée par le container
+                            onNeighbourSelected(currentNeighbour);
+                        }
+                    });
     }
 
 //interface de Callback que le container doit obligatoirement redéfinir

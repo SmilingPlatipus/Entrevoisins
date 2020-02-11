@@ -60,7 +60,7 @@ public class DetailNeighbourActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         initDetailActivity();
-        initDetailActivity();
+        initDetailActivityWidgets();
 
 
         // Change la couleur de l'étoile en fonction de la présence du voisin dans les favoris

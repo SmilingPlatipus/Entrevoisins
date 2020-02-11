@@ -59,40 +59,9 @@ public class DetailNeighbourActivity extends AppCompatActivity
         setContentView(R.layout.activity_detail_neighbour);
         ButterKnife.bind(this);
 
-        //On récupère la position du voisin sélectionné
-        intent = getIntent();
-        int selectedNeighbour = intent.getIntExtra(SELECTED_NEIGHBOUR,0);
+        initDetailActivity();
+        initDetailActivity();
 
-        sharedPreferences = this.getSharedPreferences(SAVED_FAVORITE_LIST, this.MODE_PRIVATE);
-
-        //On récupère le voisin sélectionné grâce à son id, en le recherchant dans la liste que l'API conserve :
-
-       currentNeighbour = mApiService.getNeighbour(selectedNeighbour);
-
-        // On vérifie s'il est ou non dans les favoris
-
-        favoriteadded = currentNeighbour.isFavorite();
-
-        /*Récupère à l'aide de Glide l'image du voisin en récupérant l'Url correspondante,
-        *   l'applique à un Textview situé en haut de l'écran
-        *   attribue ensuite le nom du voisin à la CardView présentant ses informations
-         */
-
-        Glide.with(this)
-                .load(currentNeighbour.getAvatarUrl())
-                .apply(RequestOptions.noTransformation())
-                .into(new SimpleTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(@NonNull Drawable resource,
-                                                @Nullable Transition<? super Drawable> transition) {
-                        /* Set a drawable to the left of textView */
-                        neighbourAvatar.setBackground(resource);
-                    }
-
-                });
-        neighbourAvatar.setText(currentNeighbour.getName());
-        cardName.setText(currentNeighbour.getName());
-        neighbourEmail.setText("www.facebook.fr/" + currentNeighbour.getName());
 
         // Change la couleur de l'étoile en fonction de la présence du voisin dans les favoris
 
@@ -150,6 +119,44 @@ public class DetailNeighbourActivity extends AppCompatActivity
         finish();
     }
 
+    public void initDetailActivity(){
 
+        //On récupère la position du voisin sélectionné
+        intent = getIntent();
+        int selectedNeighbour = intent.getIntExtra(SELECTED_NEIGHBOUR,0);
+
+        sharedPreferences = this.getSharedPreferences(SAVED_FAVORITE_LIST, this.MODE_PRIVATE);
+
+        //On récupère le voisin sélectionné grâce à son id, en le recherchant dans la liste que l'API conserve :
+
+        currentNeighbour = mApiService.getNeighbour(selectedNeighbour);
+
+        // On vérifie s'il est ou non dans les favoris
+
+        favoriteadded = currentNeighbour.isFavorite();
+    }
+
+    public void initDetailActivityWidgets(){
+        /*Récupère à l'aide de Glide l'image du voisin en récupérant l'Url correspondante,
+         *   l'applique à un Textview situé en haut de l'écran
+         *   attribue ensuite le nom du voisin à la CardView présentant ses informations
+         */
+
+        Glide.with(this)
+                .load(currentNeighbour.getAvatarUrl())
+                .apply(RequestOptions.noTransformation())
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource,
+                                                @Nullable Transition<? super Drawable> transition) {
+                        /* Set a drawable to the left of textView */
+                        neighbourAvatar.setBackground(resource);
+                    }
+
+                });
+        neighbourAvatar.setText(currentNeighbour.getName());
+        cardName.setText(currentNeighbour.getName());
+        neighbourEmail.setText("www.facebook.fr/" + currentNeighbour.getName());
+    }
 
 }
